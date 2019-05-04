@@ -319,16 +319,21 @@ public class WebSocketConnection extends WebSocketListener {
     private AtomicBoolean stop = new AtomicBoolean(false);
 
     public void run() {
+      Log.d(TAG, "enter KeepAliveSender Thread: " + Thread.currentThread().getId());
+      long startTime = System.currentTimeMillis();
       while (!stop.get()) {
         try {
-          sleepTimer.sleep(TimeUnit.SECONDS.toMillis(KEEPALIVE_TIMEOUT_SECONDS));
+          sleepTimer.sleep(TimeUnit.SECONDS.toMillis(KEEPALIVE_TIMEOUT_SECONDS) - elapsedTime(startTime));
+          startTime = System.currentTimeMillis();
 
           Log.w(TAG, "Sending keep alive...");
           sendKeepAlive();
         } catch (Throwable e) {
+          Log.w(TAG, "exception while sending keep alive");
           Log.w(TAG, e);
         }
       }
+      Log.d(TAG, "leave KeepAliveSender Thread: " + Thread.currentThread().getId());
     }
 
     public void shutdown() {
